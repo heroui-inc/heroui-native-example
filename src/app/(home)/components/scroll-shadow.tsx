@@ -1,15 +1,17 @@
 import { useHeaderHeight } from '@react-navigation/elements';
+import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollShadow, Surface } from 'heroui-native';
-import { Platform, ScrollView, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SectionTitle } from '../../../components/section-title';
-import { FlashList } from "@shopify/flash-list";
 
 const HORIZONTAL_ITEMS = Array.from({ length: 10 }, (_, i) => ({
   id: i,
   title: `Card ${i + 1}`,
 }));
+
+const HorizontalSeparator = () => <View className="w-5" />;
 
 export default function ScrollShadowScreen() {
   const insets = useSafeAreaInsets();
@@ -27,30 +29,18 @@ export default function ScrollShadowScreen() {
       }}
     >
       <SectionTitle title="Horizontal" />
-      <FlashList
-          data={HORIZONTAL_ITEMS}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <Surface variant="2" className="w-32 h-16" />
-          )}
-          ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
-          contentContainerStyle={{ padding: 20 }}
-        />
-      {/* <ScrollShadow LinearGradientComponent={LinearGradient}>
+      <ScrollShadow LinearGradientComponent={LinearGradient}>
         <FlashList
-          data={HORIZONTAL_ITEMS}
           horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
+          data={HORIZONTAL_ITEMS}
+          renderItem={({ item: _item }) => (
             <Surface variant="2" className="w-32 h-16" />
           )}
-          ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
-          contentContainerStyle={{ padding: 20 }}
+          ItemSeparatorComponent={HorizontalSeparator}
+          contentContainerStyle={styles.horizontalContent}
+          showsHorizontalScrollIndicator={false}
         />
-      </ScrollShadow> */}
+      </ScrollShadow>
       <SectionTitle title="Vertical" />
       <ScrollShadow
         size={100}
@@ -201,3 +191,9 @@ export default function ScrollShadowScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  horizontalContent: {
+    padding: 20,
+  },
+});
