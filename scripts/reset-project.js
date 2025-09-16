@@ -21,24 +21,35 @@ const indexContent = `import { Text, View } from "react-native";
 
 export default function Index() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit src/app/index.tsx to edit this screen.</Text>
+    <View className="flex-1 items-center justify-center">
+      <Text className="text-lg font-semibold">Edit src/app/index.tsx</Text>
+      <Text className="text-lg font-semibold">to edit this screen.</Text>
     </View>
   );
 }
 `;
 
 const layoutContent = `import { Stack } from "expo-router";
+import { HeroUINativeProvider } from 'heroui-native';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import '../../global.css';
 
 export default function RootLayout() {
-  return <Stack />;
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <HeroUINativeProvider>
+        <Stack />
+      </HeroUINativeProvider>
+    </GestureHandlerRootView>
+  );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});
 `;
 
 const rl = readline.createInterface({
