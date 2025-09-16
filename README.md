@@ -1,6 +1,6 @@
 # HeroUI Native Example App
 
-This is a React Native project with [HeroUI Native](https://github.com/heroui-inc/heroui-native) - a modern UI library that provides beautiful and customizable components for React Native applications.
+This is a React Native (Expo 54) project with [HeroUI Native](https://github.com/heroui-inc/heroui-native) - a modern UI library that provides beautiful and customizable components for React Native applications.
 
 ## Get started
 
