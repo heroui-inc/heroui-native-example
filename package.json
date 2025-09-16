@@ -1,7 +1,7 @@
 {
   "name": "heroui-native-example",
-  "main": "index.ts",
   "version": "v1.0.0-alpha.12",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start -c",
     "reset-project": "node ./scripts/reset-project.js",
