@@ -82,6 +82,26 @@ const moveDirectories = async (userInput) => {
       }
     }
 
+    // Update package.json version to 1.0.0
+    const packageJsonPath = path.join(root, "package.json");
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, "utf8"));
+      packageJson.version = "1.0.0";
+      await fs.promises.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
+      console.log("\n📝 Updated package.json version to 1.0.0");
+    }
+
+    // Update app.json version to 1.0.0
+    const appJsonPath = path.join(root, "app.json");
+    if (fs.existsSync(appJsonPath)) {
+      const appJson = JSON.parse(await fs.promises.readFile(appJsonPath, "utf8"));
+      if (appJson.expo && appJson.expo.version) {
+        appJson.expo.version = "1.0.0";
+        await fs.promises.writeFile(appJsonPath, JSON.stringify(appJson, null, 2) + "\n");
+        console.log("📝 Updated app.json version to 1.0.0");
+      }
+    }
+
     // Create new /src/app directory structure
     const newSrcDirPath = path.join(root, newSrcDir);
     const newAppDirPath = path.join(newSrcDirPath, newAppDir);
