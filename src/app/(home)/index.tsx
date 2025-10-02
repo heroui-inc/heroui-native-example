@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { Card, Chip, useTheme } from 'heroui-native';
@@ -33,7 +34,7 @@ const cards: HomeCardProps[] = [
       'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-components-light.png',
     imageDark:
       'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-components-dark.png',
-    count: 18,
+    count: 19,
     footer: 'Explore all components',
     path: 'components',
   },
@@ -53,7 +54,7 @@ const cards: HomeCardProps[] = [
       'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-showcases-light.png',
     imageDark:
       'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-showcases-dark-1.png',
-    count: 3,
+    count: 4,
     footer: 'View components in action',
     path: 'showcases',
   },
@@ -146,7 +147,7 @@ export default function App() {
     <ScreenScrollView>
       <View className="items-center justify-center my-4">
         <AppText className="text-muted-foreground text-base">
-          v1.0.0-alpha.13
+          v1.0.0-alpha.14
         </AppText>
       </View>
 

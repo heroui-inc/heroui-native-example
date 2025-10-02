@@ -1,6 +1,6 @@
 {
   "name": "heroui-native-example",
-  "version": "v1.0.0-alpha.13",
+  "version": "v1.0.0-alpha.14",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start -c",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.1",
     "@expo/vector-icons": "^15.0.2",
+    "@gorhom/bottom-sheet": "^5.2.6",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
@@ -33,7 +34,7 @@
     "expo-system-ui": "~6.0.7",
     "expo-updates": "~29.0.10",
     "expo-web-browser": "~15.0.7",
-    "heroui-native": "^1.0.0-alpha.13",
+    "heroui-native": "^1.0.0-alpha.14",
     "nativewind": "4.2.1",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "react": "19.1.0",
