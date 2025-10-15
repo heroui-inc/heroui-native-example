@@ -88,12 +88,17 @@ const components: Component[] = [
   {
     title: 'Radio Group',
     icon: <ComponentIcon />,
-    path: 'radio',
+    path: 'radio-group',
   },
   {
     title: 'Scroll Shadow',
     icon: <ComponentIcon />,
     path: 'scroll-shadow',
+  },
+  {
+    title: 'Select',
+    icon: <ComponentIcon />,
+    path: 'select',
   },
   {
     title: 'Skeleton',

@@ -115,7 +115,6 @@ export const Labels: FC = () => {
     );
   };
 
-  // Get display label for the chip
   const getChipLabel = () => {
     if (selectedItems.length === 0) {
       return 'No labels';
@@ -128,7 +127,7 @@ export const Labels: FC = () => {
 
   return (
     <Dialog>
-      <Dialog.Trigger>
+      <Dialog.Trigger asChild>
         <Chip
           className="h-7 bg-surface-3 px-2"
           onPress={() => {
@@ -137,12 +136,10 @@ export const Labels: FC = () => {
             }
           }}
         >
-          <Chip.StartContent>{renderStackedIndicators()}</Chip.StartContent>
-          <Chip.LabelContent
-            classNames={{ text: 'text-foreground font-medium' }}
-          >
+          {renderStackedIndicators()}
+          <Chip.Label className="text-foreground font-medium">
             {getChipLabel()}
-          </Chip.LabelContent>
+          </Chip.Label>
         </Chip>
       </Dialog.Trigger>
       <Dialog.Portal>
