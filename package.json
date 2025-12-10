@@ -36,7 +36,7 @@
     "expo-system-ui": "~6.0.7",
     "expo-updates": "~29.0.14",
     "expo-web-browser": "~15.0.7",
-    "heroui-native": "^1.0.0-beta.6",
+    "heroui-native": "^1.0.0-beta.7",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -53,7 +53,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.1.17",
-    "uniwind": "1.0.5"
+    "uniwind": "1.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
