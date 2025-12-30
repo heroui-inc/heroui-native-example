@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+
 import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
 import { cn } from 'heroui-native';
@@ -23,7 +24,7 @@ export const ThemeToggle: FC = () => {
         }
         toggleTheme();
       }}
-      className={cn('p-3', isLGAvailable && 'px-2.5 py-0')}
+      className={cn('p-3', isLGAvailable && 'px-2.5 py-2')}
     >
       {isLight ? (
         <Animated.View key="moon" entering={ZoomIn} exiting={FadeOut}>
