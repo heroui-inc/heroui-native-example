@@ -58,7 +58,7 @@ const cards: HomeCardProps[] = [
       'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-showcases-light.png',
     imageDark:
       'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-showcases-dark-1.png',
-    count: 5,
+    count: 6,
     footer: 'View components in action',
     path: 'showcases',
   },
@@ -157,7 +157,7 @@ export default function App() {
   return (
     <ScreenScrollView>
       <View className="items-center justify-center my-4">
-        <AppText className="text-muted text-base">v1.0.0-beta.10</AppText>
+        <AppText className="text-muted text-base">v1.0.0-beta.11</AppText>
       </View>
       <View className="gap-6">
         {cards.map((card, index) => (
