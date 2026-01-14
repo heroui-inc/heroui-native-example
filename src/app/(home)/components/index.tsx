@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { usePathname, useRouter } from 'expo-router';
-import { Accordion, useToast } from 'heroui-native';
+import { Accordion, PressableFeedback, useToast } from 'heroui-native';
 import { useEffect } from 'react';
 import { Platform, View } from 'react-native';
 import { withUniwind } from 'uniwind';
@@ -25,7 +25,7 @@ const components: Component[] = [
     path: 'avatar',
   },
   {
-    title: 'Bottom Sheet',
+    title: 'BottomSheet',
     path: 'bottom-sheet',
   },
   {
@@ -45,6 +45,10 @@ const components: Component[] = [
     path: 'chip',
   },
   {
+    title: 'Description',
+    path: 'description',
+  },
+  {
     title: 'Dialog',
     path: 'dialog',
   },
@@ -53,27 +57,35 @@ const components: Component[] = [
     path: 'divider',
   },
   {
-    title: 'Error View',
+    title: 'ErrorView',
     path: 'error-view',
   },
   {
-    title: 'Form Field',
+    title: 'FormField',
     path: 'form-field',
+  },
+  {
+    title: 'InputOTP',
+    path: 'input-otp',
+  },
+  {
+    title: 'Label',
+    path: 'label',
   },
   {
     title: 'Popover',
     path: 'popover',
   },
   {
-    title: 'Pressable Feedback',
+    title: 'PressableFeedback',
     path: 'pressable-feedback',
   },
   {
-    title: 'Radio Group',
+    title: 'RadioGroup',
     path: 'radio-group',
   },
   {
-    title: 'Scroll Shadow',
+    title: 'ScrollShadow',
     path: 'scroll-shadow',
   },
   {
@@ -101,7 +113,7 @@ const components: Component[] = [
     path: 'tabs',
   },
   {
-    title: 'Text Field',
+    title: 'TextField',
     path: 'text-field',
   },
   {
@@ -136,17 +148,20 @@ export default function App() {
                 }
                 router.push(`/components/${item.path}`);
               }}
+              asChild
             >
-              <AppText className="text-foreground text-base ml-1">
-                {item.title}
-              </AppText>
-              <Accordion.Indicator>
-                <StyledIonicons
-                  name="chevron-forward"
-                  size={16}
-                  className="text-muted"
-                />
-              </Accordion.Indicator>
+              <PressableFeedback>
+                <AppText className="text-foreground text-base ml-1">
+                  {item.title}
+                </AppText>
+                <Accordion.Indicator>
+                  <StyledIonicons
+                    name="chevron-forward"
+                    size={16}
+                    className="text-muted"
+                  />
+                </Accordion.Indicator>
+              </PressableFeedback>
             </Accordion.Trigger>
           </Accordion.Item>
         ))}
