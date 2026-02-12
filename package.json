@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.1",
+    "@expo-google-fonts/saira": "^0.4.2",
+    "@expo-google-fonts/sn-pro": "^0.4.0",
+    "@expo-google-fonts/space-grotesk": "^0.4.1",
     "@expo/vector-icons": "^15.0.2",
     "@gorhom/bottom-sheet": "^5.2.6",
     "@react-native-masked-view/masked-view": "^0.3.2",
@@ -36,7 +39,7 @@
     "expo-system-ui": "~6.0.7",
     "expo-updates": "~29.0.14",
     "expo-web-browser": "~15.0.7",
-    "heroui-native": "^1.0.0-beta.13",
+    "heroui-native": "^1.0.0-rc.1",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "react": "19.1.0",
     "react-dom": "19.1.0",

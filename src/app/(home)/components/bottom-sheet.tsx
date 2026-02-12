@@ -9,6 +9,7 @@ import { AppText } from '../../../components/app-text';
 import { BottomSheetBlurOverlay } from '../../../components/bottom-sheet-blur-overlay';
 import { BasicBottomSheetContent } from '../../../components/bottom-sheet/basic';
 import { ScrollableWithSnapPointsContent } from '../../../components/bottom-sheet/scrollable-with-snap-points';
+import { WithOTPInputContent } from '../../../components/bottom-sheet/with-otp-input';
 import { WithTextInputContent } from '../../../components/bottom-sheet/with-text-input';
 import type { UsageVariant } from '../../../components/component-presentation/types';
 import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
@@ -37,7 +38,7 @@ const DetachedBottomSheetContent = () => {
               detached={true}
               bottomInset={insets.bottom + 12}
               className="mx-4"
-              backgroundClassName="rounded-[32px]"
+              backgroundClassName="rounded-4xl"
               contentContainerClassName="pb-4"
             >
               <View className="items-center mb-5">
@@ -197,6 +198,11 @@ const BOTTOM_SHEET_VARIANTS_IOS: UsageVariant[] = [
     label: 'Bottom sheet with text input',
     content: <WithTextInputContent />,
   },
+  {
+    value: 'with-otp-input',
+    label: 'Bottom sheet with OTP input',
+    content: <WithOTPInputContent />,
+  },
 ];
 
 const BOTTOM_SHEET_VARIANTS_ANDROID: UsageVariant[] = [
@@ -219,6 +225,11 @@ const BOTTOM_SHEET_VARIANTS_ANDROID: UsageVariant[] = [
     value: 'with-text-input',
     label: 'Bottom sheet with text input',
     content: <WithTextInputContent />,
+  },
+  {
+    value: 'with-otp-input',
+    label: 'Bottom sheet with OTP input',
+    content: <WithOTPInputContent />,
   },
 ];
 
