@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @import 'uniwind';
 @import 'heroui-native/styles';
-
+@import 'heroui-native/styles/vibrant';
 @import './themes/lavander.css';
 @import './themes/mint.css';
 @import './themes/sky.css';
