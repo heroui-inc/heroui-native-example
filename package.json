@@ -41,7 +41,7 @@
     "expo-system-ui": "~57.0.0",
     "expo-updates": "~57.0.5",
     "expo-web-browser": "~57.0.0",
-    "heroui-native": "^1.0.5",
+    "heroui-native": "^1.0.7",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react": "19.2.3",
     "react-dom": "19.2.3",
