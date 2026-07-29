@@ -28,9 +28,9 @@ export const ThemeToggle: FC = () => {
       onPressOut={() => {
         toggleTheme();
       }}
-      className={cn('p-3 z-50', isLGAvailable && 'px-2.5 py-2')}
-      hitSlop={12}
-      activeOpacity={0.8}
+      className={cn('p-6 z-50 opacity-50', isLGAvailable && 'px-2.5 py-2')}
+      hitSlop={24}
+      activeOpacity={0.3}
     >
       {isLight ? (
         <Animated.View key="moon" entering={ZoomIn} exiting={FadeOut}>

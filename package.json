@@ -8,7 +8,9 @@
     "android": "expo start --android -c",
     "ios": "expo start --ios -c",
     "web": "expo start --web -c",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "verify": "expo export --platform all --output-dir dist",
+    "sync:upstream": "node ./scripts/sync-upstream-example.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.1",

@@ -1,0 +1,51 @@
+{
+  "$comment": "Rules used by scripts/sync-upstream-example.mjs to mirror heroui-inc/heroui-native's example app into this repository. Edit this file (not the script) when the divergence between the two apps changes.",
+  "upstream": {
+    "repo": "heroui-inc/heroui-native",
+    "libraryPackage": "heroui-native",
+    "exampleDir": "example"
+  },
+  "mirrors": [
+    {
+      "from": "example/src",
+      "to": "src"
+    },
+    {
+      "from": "example/themes",
+      "to": "themes"
+    }
+  ],
+  "keep": ["src/uniwind-types.d.ts"],
+  "ignoreNames": [".DS_Store", "Thumbs.db"],
+  "protectedFiles": [
+    "app.json",
+    "global.css",
+    "babel.config.js",
+    "metro.config.js",
+    "tsconfig.json",
+    "eslint.config.js",
+    "README.md"
+  ],
+  "packageJson": {
+    "ignoredUpstreamDependencies": [
+      "babel-plugin-module-resolver",
+      "react-native-builder-bob",
+      "react-native-monorepo-config"
+    ],
+    "exampleOnlyDependencies": [
+      "heroui-native",
+      "babel-preset-expo",
+      "expo-symbols",
+      "expo-system-ui",
+      "expo-web-browser",
+      "react-native-webview",
+      "@types/react",
+      "eslint",
+      "eslint-config-expo",
+      "typescript"
+    ]
+  },
+  "versionBadge": {
+    "file": "src/app/(home)/index.tsx"
+  }
+}

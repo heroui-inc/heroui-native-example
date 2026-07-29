@@ -1,0 +1,374 @@
+name: Sync heroui-native release
+
+# Mirrors the example app from heroui-inc/heroui-native after a release, verifies
+# it, and opens a pull request. Triggered automatically by the library's release
+# workflow, or manually from the Actions tab for a specific version.
+
+on:
+  repository_dispatch:
+    types: [heroui-native-released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "heroui-native version, e.g. 1.0.7. Leave blank for the latest published version."
+        required: false
+        type: string
+      draft:
+        description: "Open the pull request as a draft"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-heroui-native-${{ github.event.client_payload.version || github.event.inputs.version || 'latest' }}
+  cancel-in-progress: false
+
+env:
+  UPSTREAM_REPO: heroui-inc/heroui-native
+  UPSTREAM_DIR: .upstream
+  MAX_REPAIR_ATTEMPTS: "3"
+
+jobs:
+  sync:
+    name: Sync, verify and open PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout example app
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Resolve target version
+        id: target
+        env:
+          PAYLOAD_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -euo pipefail
+
+          version="${PAYLOAD_VERSION:-${INPUT_VERSION:-}}"
+          version="${version#v}"
+
+          if [ -z "$version" ]; then
+            version="$(npm view heroui-native version)"
+            echo "No version supplied; using the latest published version $version."
+          fi
+
+          if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::'$version' is not a valid version"
+            exit 1
+          fi
+
+          # The range currently committed on the default branch, used to decide how
+          # much of the upstream changelog is relevant to this upgrade.
+          previous="$(node -e "process.stdout.write(String(require('./package.json').dependencies['heroui-native'] ?? '').replace(/^[^0-9]*/, ''))")"
+
+          prerelease=false
+          case "$version" in
+            *-*) prerelease=true ;;
+          esac
+
+          {
+            echo "version=$version"
+            echo "previous=$previous"
+            echo "tag=v$version"
+            echo "branch=chore/upgrade-heroui-native-v$version"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Syncing heroui-native v$version (currently on ${previous:-unknown}, prerelease: $prerelease)."
+
+      - name: Wait for npm to publish the version
+        env:
+          VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          # The release workflow dispatches immediately after `npm publish`, so the
+          # registry can lag behind the event by a few seconds.
+          for attempt in $(seq 1 40); do
+            if npm view "heroui-native@$VERSION" version > /dev/null 2>&1; then
+              echo "heroui-native@$VERSION is available on npm."
+              exit 0
+            fi
+            echo "Attempt $attempt: heroui-native@$VERSION not on npm yet; waiting 15s."
+            sleep 15
+          done
+
+          echo "::error::heroui-native@$VERSION did not appear on npm within 10 minutes"
+          exit 1
+
+      - name: Checkout library at the release tag
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.UPSTREAM_REPO }}
+          ref: refs/tags/${{ steps.target.outputs.tag }}
+          path: ${{ env.UPSTREAM_DIR }}
+          token: ${{ secrets.UPSTREAM_READ_TOKEN || github.token }}
+          persist-credentials: false
+
+      - name: Collect upstream release notes
+        env:
+          VERSION: ${{ steps.target.outputs.version }}
+          PREVIOUS: ${{ steps.target.outputs.previous }}
+        run: |
+          set -euo pipefail
+          mkdir -p .sync
+
+          changelog="$UPSTREAM_DIR/CHANGELOG.md"
+          output=.sync/upstream-changelog.md
+
+          if [ ! -f "$changelog" ]; then
+            echo "No CHANGELOG.md in the upstream checkout." > "$output"
+            exit 0
+          fi
+
+          # Print every section from the target version down to (but excluding) the
+          # version this repository is upgrading from, so multi-release gaps are covered.
+          awk -v target="$VERSION" -v previous="$PREVIOUS" '
+            function version_of(line) {
+              if (match(line, /[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?/)) {
+                return substr(line, RSTART, RLENGTH)
+              }
+              return ""
+            }
+            /^## / {
+              found = version_of($0)
+              if (found == target) { printing = 1 }
+              else if (found == previous) { printing = 0 }
+            }
+            printing { print }
+          ' "$changelog" > "$RUNNER_TEMP/changelog-section.md"
+
+          # Truncated separately: piping awk into head would close the pipe early and
+          # trip `pipefail`.
+          head -c 20000 "$RUNNER_TEMP/changelog-section.md" > "$output"
+
+          if [ ! -s "$output" ]; then
+            echo "No changelog entry found for $VERSION." > "$output"
+          fi
+
+          echo "Release notes:"
+          cat "$output"
+
+      - name: Sync upstream example
+        env:
+          VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          set -euo pipefail
+          node ./scripts/sync-upstream-example.mjs \
+            --version "$VERSION" \
+            --upstream-path "$UPSTREAM_DIR" \
+            --report-out .sync/report.md
+
+          cat .sync/report.md
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and repair
+        id: verify
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          CURSOR_MODEL: ${{ vars.CURSOR_MODEL }}
+          VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          set -uo pipefail
+
+          agent_bin=""
+
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "::warning::CURSOR_API_KEY is not configured; skipping the repair stage."
+          else
+            curl https://cursor.com/install -fsS | bash || true
+            export PATH="$HOME/.cursor/bin:$PATH"
+
+            if command -v cursor-agent > /dev/null 2>&1; then
+              agent_bin=cursor-agent
+            elif command -v agent > /dev/null 2>&1; then
+              agent_bin=agent
+            else
+              echo "::warning::Cursor CLI could not be installed; skipping the repair stage."
+            fi
+          fi
+
+          model_args=()
+          if [ -n "${CURSOR_MODEL:-}" ]; then
+            model_args=(--model "$CURSOR_MODEL")
+          fi
+
+          : > .sync/gates.md
+
+          # `npm run verify` bundles the app for iOS, Android and web against the
+          # published package. Lint and type-checking are deliberately not gated here:
+          # `src/` and `themes/` are mirrored verbatim from upstream and are checked in
+          # that repository, so any finding they produce is not actionable in this one.
+          run_gates() {
+            local label="$1"
+            local log="$RUNNER_TEMP/gates-$label.log"
+
+            if npm run verify > "$log" 2>&1; then
+              local result=pass
+            else
+              local result=fail
+            fi
+
+            {
+              echo "## Bundle: $label ($result)"
+              echo
+              echo '```'
+              tail -c 12000 "$log"
+              echo '```'
+              echo
+            } >> .sync/gates.md
+
+            echo "Bundle ($label): $result"
+            [ "$result" = pass ]
+          }
+
+          if run_gates "initial"; then
+            status=pass
+          else
+            status=fail
+          fi
+
+          # The agent still runs on a clean sync, because it also writes the pull
+          # request description.
+          if [ -n "$agent_bin" ]; then
+            for attempt in $(seq 1 "$MAX_REPAIR_ATTEMPTS"); do
+              echo "::group::Cursor agent attempt $attempt"
+              "$agent_bin" -p --force --output-format text "${model_args[@]}" \
+                "$(cat .github/agent/sync-task.md)" || echo "Agent exited non-zero on attempt $attempt."
+              echo "::endgroup::"
+
+              if run_gates "after-agent-$attempt"; then
+                status=pass
+                break
+              fi
+
+              status=fail
+
+              if [ "$attempt" -eq "$MAX_REPAIR_ATTEMPTS" ]; then
+                echo "::warning::The app still does not bundle after $MAX_REPAIR_ATTEMPTS agent attempt(s)."
+              fi
+            done
+          fi
+
+          echo "gates=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Run expo-doctor (advisory)
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          npx expo-doctor 2>&1 | tee "$RUNNER_TEMP/expo-doctor.log"
+
+          {
+            echo "## expo-doctor (advisory)"
+            echo
+            echo '```'
+            tail -c 4000 "$RUNNER_TEMP/expo-doctor.log"
+            echo '```'
+          } >> .sync/expo-doctor.md
+
+      - name: Open or update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.target.outputs.version }}
+          BRANCH: ${{ steps.target.outputs.branch }}
+          PRERELEASE: ${{ steps.target.outputs.prerelease }}
+          GATES: ${{ steps.verify.outputs.gates }}
+          DRAFT_INPUT: ${{ github.event.inputs.draft }}
+          RUN_URL: ${{ github.event.client_payload.run_url }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Working tree is clean; this repository already matches heroui-native v$VERSION."
+            exit 0
+          fi
+
+          git switch --force-create "$BRANCH"
+          git add --all
+          git commit --message "chore: upgrade heroui-native to v$VERSION"
+          git push --force origin "$BRANCH"
+
+          body=.sync/pr-body.md
+          if [ ! -s "$body" ]; then
+            # The agent normally writes this; fall back to the raw report so a failed
+            # agent run still produces a reviewable pull request.
+            {
+              echo "## Summary"
+              echo
+              echo "Mechanical sync of heroui-native v$VERSION. The agent did not produce a"
+              echo "description, so this is the raw sync report."
+              echo
+              cat .sync/report.md
+            } > "$body"
+          fi
+
+          {
+            echo
+            echo "## Verification"
+            echo
+            echo "iOS, Android and web bundles: **$GATES**"
+            echo
+            if [ -f .sync/expo-doctor.md ]; then
+              echo "<details><summary>expo-doctor (advisory, does not block)</summary>"
+              echo
+              sed 's/^## expo-doctor (advisory)$//' .sync/expo-doctor.md
+              echo
+              echo "</details>"
+              echo
+            fi
+            echo "Generated by [\`sync-heroui-native.yml\`]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)."
+            if [ -n "${RUN_URL:-}" ]; then
+              echo " Triggered by [the upstream release run]($RUN_URL)."
+            fi
+          } >> "$body"
+
+          draft=false
+          if [ "$GATES" != pass ] || [ "$PRERELEASE" = true ] || [ "${DRAFT_INPUT:-false}" = true ]; then
+            draft=true
+          fi
+
+          title="chore: upgrade heroui-native to v$VERSION"
+
+          if gh pr view "$BRANCH" --json number > /dev/null 2>&1; then
+            gh pr edit "$BRANCH" --title "$title" --body-file "$body"
+            echo "Updated the existing pull request."
+          else
+            create_args=(--head "$BRANCH" --title "$title" --body-file "$body")
+            if [ "$draft" = true ]; then
+              create_args+=(--draft)
+            fi
+            gh pr create "${create_args[@]}"
+          fi
+
+          if [ "$draft" = true ]; then
+            gh pr ready "$BRANCH" --undo || true
+          else
+            gh pr ready "$BRANCH" || true
+          fi
+
+          gh pr view "$BRANCH" --json url --jq .url
+
+      - name: Fail the run when the bundle did not build
+        if: steps.verify.outputs.gates != 'pass'
+        run: |
+          echo "::error::The app did not bundle successfully; the pull request was opened as a draft for manual review."
+          exit 1
