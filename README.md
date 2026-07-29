@@ -52,6 +52,6 @@ HeroUI Native is a comprehensive UI library built for React Native that provides
 - Consistent design system
 - TypeScript support
 - Customizable theming
-- Modern styling with NativeWind/Tailwind CSS
+- Modern styling with Uniwind/Tailwind CSS
 
 Learn more about HeroUI Native at: https://github.com/heroui-inc/heroui-native
