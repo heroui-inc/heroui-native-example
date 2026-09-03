@@ -10,7 +10,10 @@
     "web": "expo start --web -c",
     "lint": "expo lint",
     "verify": "expo export --platform all --output-dir dist",
-    "sync:upstream": "node ./scripts/sync-upstream-example.mjs"
+    "sync:upstream": "node ./scripts/sync-upstream-example.mjs",
+    "i18n:extract": "lingui extract",
+    "i18n:compile": "lingui compile --typescript",
+    "i18n": "npm run i18n:extract && npm run i18n:compile"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.1",

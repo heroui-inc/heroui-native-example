@@ -21,6 +21,7 @@
     "app.json",
     "global.css",
     "babel.config.js",
+    "lingui.config.ts",
     "metro.config.js",
     "tsconfig.json",
     "eslint.config.js",
